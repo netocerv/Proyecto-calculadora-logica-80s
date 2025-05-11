@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Bayesiana - Estilo Retro 80s</title>
+    <style>
+        /* Estética Retro 80s */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        :root {
+            --primary: #ff00ff; /* Magenta neón */
+            --secondary: #00ffff; /* Cyan neón */
+            --tertiary: #ffff00; /* Amarillo neón */
+            --bg-dark: #000033; /* Azul oscuro */
+            --bg-light: #000066; /* Azul medio */
+            --text: #ffffff; /* Blanco */
+            --grid: rgba(0, 255, 255, 0.2); /* Grid cyan transparente */
+        }
+        
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.6;
+            background-image: linear-gradient(0deg, var(--grid) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 20px 20px;
+            text-shadow: 0 0 5px var(--primary);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--bg-light);
+            padding: 20px;
+            border: 4px solid var(--primary);
+            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--secondary);
+        }
+        
+        h1 {
+            color: var(--tertiary);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0 var(--primary), 6px 6px 0 var(--secondary);
+        }
+        
+        h2 {
+            color: var(--secondary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            color: var(--tertiary);
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            background-color: black;
+            border: 2px solid var(--primary);
+            color: var(--secondary);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin: 10px 0;
+            border: 2px solid var(--text);
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+            box-shadow: 0 0 15px var(--secondary);
+            transform: scale(1.05);
+        }
+        
+        .output {
+            background-color: black;
+            border: 2px solid var(--secondary);
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .output p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+        
+        .result-value {
+            color: var(--tertiary);
+            font-weight: bold;
+        }
+        
+        .group {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 2px dashed var(--secondary);
+        }
+        
+        .scanner {
+            height: 5px;
+            width: 100%;
+            background-color: var(--primary);
+            position: relative;
+            margin: 20px 0;
+            box-shadow: 0 0 10px var(--primary);
+            animation: scan 2s infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        
+        .retro-grid {
+            position: relative;
+            perspective: 100px;
+            margin: 30px 0;
+            height: 100px;
+            overflow: hidden;
+        }
+        
+        .grid-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+            transform-origin: center;
+            animation: grid-move 3s infinite linear;
+        }
+        
+        @keyframes grid-move {
+            0% { transform: rotateX(70deg) translateY(-100px); }
+            100% { transform: rotateX(70deg) translateY(100px); }
+        }
+        
+        .diagram {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .venn {
+            width: 300px;
+            height: 200px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .circle {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid black;
+        }
+        
+        .circle-a {
+            background-color: rgba(255, 0, 255, 0.5);
+            left: 40px;
+        }
+        
+        .circle-b {
+            background-color: rgba(0, 255, 255, 0.5);
+            right: 40px;
+        }
+        
+        #instructions {
+            font-size: 12px;
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid var(--tertiary);
+        }
+        
+        .divider {
+            width: 100%;
+            height: 10px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--primary),
+                var(--primary) 20px,
+                var(--secondary) 20px,
+                var(--secondary) 40px
+            );
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="retro-grid">
+            <div class="grid-line" style="top: 20px;"></div>
+            <div class="grid-line" style="top: 40px;"></div>
+            <div class="grid-line" style="top: 60px;"></div>
+            <div class="grid-line" style="top: 80px;"></div>
+        </div>
+        
+        <h1>Calculadora Bayesiana <span class="blink">_</span></h1>
+        
+        <div class="scanner"></div>
+        
+        <div id="instructions">
+            <h2>Instrucciones</h2>
+            <p>Esta calculadora te permite aplicar el Teorema de Bayes para calcular probabilidades condicionales.</p>
+            <p>Formula: P(A|B) = [P(B|A) * P(A)] / P(B)</p>
+        </div>
+        
+        <div class="group">
+            <h2>Configuración del espacio muestral</h2>
+            <label for="evento-a">Nombre del evento A:</label>
+            <input type="text" id="evento-a" placeholder="Ej: Tener la enfermedad">
+            
+            <label for="evento-b">Nombre del evento B (evidencia):</label>
+            <input type="text" id="evento-b" placeholder="Ej: Resultado positivo en prueba">
+            
+            <label for="total-poblacion">Tamaño del espacio muestral (población total):</label>
+            <input type="number" id="total-poblacion" min="1" placeholder="Ej: 1000">
+        </div>
+        
+        <div class="group">
+            <h2>Datos de probabilidad</h2>
+            <label for="prob-a">P(A) - Probabilidad a priori de A:</label>
+            <input type="number" id="prob-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.01">
+            
+            <label for="prob-b-given-a">P(B|A) - Probabilidad de B dado A:</label>
+            <input type="number" id="prob-b-given-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.95">
+            
+            <label for="prob-b-given-not-a">P(B|¬A) - Probabilidad de B dado NO A:</label>
+            <input type="number" id="prob-b-given-not-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.05">
+        </div>
+        
+        <button id="calcular">CALCULAR PROBABILIDADES</button>
+        <button id="reset">REINICIAR DATOS</button>
+        <button id="cargar-ejemplo">CARGAR EJEMPLO ENFERMEDAD</button>
+        
+        <div class="divider"></div>
+        
+        <div class="output" id="resultados">
+            <p>> Presiona CALCULAR para ver los resultados...</p>
+        </div>
+        
+        <div class="diagram">
+            <h2>Diagrama de Venn</h2>
+            <div class="venn">
+                <div class="circle circle-a" id="circle-a">A</div>
+                <div class="circle circle-b" id="circle-b">B</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const calcularBtn = document.getElementById('calcular');
+            const resetBtn = document.getElementById('reset');
+            const cargarEjemploBtn = document.getElementById('cargar-ejemplo');
+            const resultadosDiv = document.getElementById('resultados');
+            const circleA = document.getElementById('circle-a');
+            const circleB = document.getElementById('circle-b');
+            
+            // Creación de líneas de grid animadas
+            for (let i = 0; i < 5; i++) {
+                const delay = i * 0.6;
+                const gridLine = document.createElement('div');
+                gridLine.className = 'grid-line';
+                gridLine.style.top = (i * 20) + 'px';
+                gridLine.style.animationDelay = delay + 's';
+                document.querySelector('.retro-grid').appendChild(gridLine);
+            }
+            
+            // Función para calcular probabilidades
+            calcularBtn.addEventListener('click', function() {
+                // Obtener valores de entrada
+                const eventoA = document.getElementById('evento-a').value || 'Evento A';
+                const eventoB = document.getElementById('evento-b').value || 'Evento B';
+                const total = parseFloat(document.getElementById('total-poblacion').value) || 1000;
+                const probA = parseFloat(document.getElementById('prob-a').value) || 0;
+                const probBGivenA = parseFloat(document.getElementById('prob-b-given-a').value) || 0;
+                const probBGivenNotA = parseFloat(document.getElementById('prob-b-given-not-a').value) || 0;
+                
+                // Validar entradas
+                if (probA < 0 || probA > 1 || probBGivenA < 0 || probBGivenA > 1 || 
+                    probBGivenNotA < 0 || probBGivenNotA > 1) {
+                    resultadosDiv.innerHTML = `<p style="color: red;">Error: Las probabilidades deben estar entre 0 y 1.</p>`;
+                    return;
+                }
+                
+                // Cálculos de cardinalidad basados en probabilidades
+                const cardinalidadA = Math.round(total * probA);
+                const cardinalidadNotA = total - cardinalidadA;
+                
+                const cardinalidadBGivenA = Math.round(cardinalidadA * probBGivenA);
+                const cardinalidadBGivenNotA = Math.round(cardinalidadNotA * probBGivenNotA);
+                
+                const cardinalidadB = cardinalidadBGivenA + cardinalidadBGivenNotA;
+                const cardinalidadAandB = cardinalidadBGivenA;
+                
+                // Cálculo de las probabilidades
+                const probB = cardinalidadB / total;
+                const probAGivenB = probBGivenA * probA / probB;
+                
+                // Actualizar la visualización del diagrama de Venn
+                circleA.textContent = `A: ${cardinalidadA}`;
+                circleB.textContent = `B: ${cardinalidadB}`;
+                
+                // Mostrar resultados
+                resultadosDiv.innerHTML = `
+                    <p>> <span class="result-value">RESULTADOS DEL CÁLCULO:</span></p>
+                    <p>> Espacio muestral: ${total} elementos</p>
+                    <p>> Cardinalidad de ${eventoA}: ${cardinalidadA}</p>
+                    <p>> Cardinalidad de ${eventoB}: ${cardinalidadB}</p>
+                    <p>> Cardinalidad de intersección (${eventoA} ∩ ${eventoB}): ${cardinalidadAandB}</p>
+                    <p>> P(${eventoA}) = ${probA.toFixed(4)}</p>
+                    <p>> P(${eventoB}) = ${probB.toFixed(4)}</p>
+                    <p>> P(${eventoB}|${eventoA}) = ${probBGivenA.toFixed(4)}</p>
+                    <p>> <span class="result-value">P(${eventoA}|${eventoB}) = ${probAGivenB.toFixed(4)}</span></p>
+                    <p>> Interpretación: La probabilidad de ${eventoA} dado que se observa ${eventoB} es ${(probAGivenB * 100).toFixed(2)}%</p>
+                `;
+                
+                // Efecto de animación para los resultados
+                resultadosDiv.style.animation = 'none';
+                setTimeout(() => {
+                    resultadosDiv.style.animation = 'blink 0.2s';
+                }, 10);
+            });
+            
+            // Función para reiniciar datos
+            resetBtn.addEventListener('click', function() {
+                document.getElementById('evento-a').value = '';
+                document.getElementById('evento-b').value = '';
+                document.getElementById('total-poblacion').value = '';
+                document.getElementById('prob-a').value = '';
+                document.getElementById('prob-b-given-a').value = '';
+                document.getElementById('prob-b-given-not-a').value = '';
+                
+                resultadosDiv.innerHTML = '<p>> Datos reiniciados. Presiona CALCULAR para ver nuevos resultados...</p>';
+                
+                circleA.textContent = 'A';
+                circleB.textContent = 'B';
+            });
+            
+            // Función para cargar ejemplo de enfermedad
+            cargarEjemploBtn.addEventListener('click', function() {
+                document.getElementById('evento-a').value = 'Tener la enfermedad';
+                document.getElementById('evento-b').value = 'Resultado positivo';
+                document.getElementById('total-poblacion').value = '10000';
+                document.getElementById('prob-a').value = '0.01';
+                document.getElementById('prob-b-given-a').value = '0.95';
+                document.getElementById('prob-b-given-not-a').value = '0.05';
+                
+                resultadosDiv.innerHTML = '<p>> Ejemplo cargado. Presiona CALCULAR para ver los resultados...</p>';
+            });
+        });
+    </script>
+</body>
+</html>
