@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,17 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora Bayesiana - Estilo Retro 80s</title>
     <style>
-        /* Estética Retro 80s */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         :root {
-            --primary: #ff00ff; /* Magenta neón */
-            --secondary: #00ffff; /* Cyan neón */
-            --tertiary: #ffff00; /* Amarillo neón */
-            --bg-dark: #000033; /* Azul oscuro */
-            --bg-light: #000066; /* Azul medio */
-            --text: #ffffff; /* Blanco */
-            --grid: rgba(0, 255, 255, 0.2); /* Grid cyan transparente */
+            --primary: #ff00ff;
+            --secondary: #00ffff;
+            --tertiary: #ffff00;
+            --bg-dark: #000033;
+            --bg-light: #000066;
+            --text: #ffffff;
+            --grid: rgba(0, 255, 255, 0.2);
         }
         
         body {
@@ -28,6 +28,7 @@
                               linear-gradient(90deg, var(--grid) 1px, transparent 1px);
             background-size: 20px 20px;
             text-shadow: 0 0 5px var(--primary);
+            margin: 0;
         }
         
         .container {
@@ -62,7 +63,8 @@
         }
         
         input[type="text"],
-        input[type="number"] {
+        input[type="number"],
+        textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 15px;
@@ -71,6 +73,11 @@
             color: var(--secondary);
             font-family: 'Press Start 2P', cursive;
             font-size: 14px;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
         }
         
         button {
@@ -183,6 +190,7 @@
             justify-content: center;
             font-weight: bold;
             border: 2px solid black;
+            transition: all 0.5s ease;
         }
         
         .circle-a {
@@ -214,6 +222,142 @@
             );
             margin: 30px 0;
         }
+        
+        .observation-item {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid var(--tertiary);
+        }
+        
+        #observaciones-lista {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .tab-button {
+            background-color: var(--bg-dark);
+            color: var(--text);
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid var(--primary);
+        }
+        
+        .tab-button.active {
+            background-color: var(--primary);
+            color: black;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: var(--bg-dark);
+            border: 2px solid var(--primary);
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--tertiary);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--bg-dark);
+            border: 2px solid var(--primary);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -15px;
+        }
+        
+        .progress-step.active {
+            background-color: var(--tertiary);
+            color: black;
+        }
+        
+        .progress-step:nth-child(2) {
+            left: 0%;
+        }
+        
+        .progress-step:nth-child(3) {
+            left: 33%;
+        }
+        
+        .progress-step:nth-child(4) {
+            left: 66%;
+        }
+        
+        .progress-step:nth-child(5) {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: var(--primary);
+            color: black;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        #elementos-espacio {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .input-helper {
+            font-size: 10px;
+            color: var(--tertiary);
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .venn {
+                width: 250px;
+            }
+            
+            .circle {
+                width: 120px;
+                height: 120px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -233,89 +377,332 @@
             <h2>Instrucciones</h2>
             <p>Esta calculadora te permite aplicar el Teorema de Bayes para calcular probabilidades condicionales.</p>
             <p>Formula: P(A|B) = [P(B|A) * P(A)] / P(B)</p>
+            <p>Sigue los pasos secuencialmente para registrar observaciones, configurar el espacio muestral y calcular probabilidades.</p>
         </div>
         
-        <div class="group">
-            <h2>Configuración del espacio muestral</h2>
-            <label for="evento-a">Nombre del evento A:</label>
-            <input type="text" id="evento-a" placeholder="Ej: Tener la enfermedad">
-            
-            <label for="evento-b">Nombre del evento B (evidencia):</label>
-            <input type="text" id="evento-b" placeholder="Ej: Resultado positivo en prueba">
-            
-            <label for="total-poblacion">Tamaño del espacio muestral (población total):</label>
-            <input type="number" id="total-poblacion" min="1" placeholder="Ej: 1000">
+        <div class="progress-bar">
+            <div class="progress" id="progress-bar"></div>
+            <div class="progress-step active">1</div>
+            <div class="progress-step">2</div>
+            <div class="progress-step">3</div>
+            <div class="progress-step">4</div>
         </div>
         
-        <div class="group">
-            <h2>Datos de probabilidad</h2>
-            <label for="prob-a">P(A) - Probabilidad a priori de A:</label>
-            <input type="number" id="prob-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.01">
-            
-            <label for="prob-b-given-a">P(B|A) - Probabilidad de B dado A:</label>
-            <input type="number" id="prob-b-given-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.95">
-            
-            <label for="prob-b-given-not-a">P(B|¬A) - Probabilidad de B dado NO A:</label>
-            <input type="number" id="prob-b-given-not-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.05">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="tab1">1. Registro Observaciones</button>
+            <button class="tab-button" data-tab="tab2">2. Espacio Muestral</button>
+            <button class="tab-button" data-tab="tab3">3. Datos Probabilidad</button>
+            <button class="tab-button" data-tab="tab4">4. Resultados</button>
         </div>
         
-        <button id="calcular">CALCULAR PROBABILIDADES</button>
-        <button id="reset">REINICIAR DATOS</button>
-        <button id="cargar-ejemplo">CARGAR EJEMPLO ENFERMEDAD</button>
-        
-        <div class="divider"></div>
-        
-        <div class="output" id="resultados">
-            <p>> Presiona CALCULAR para ver los resultados...</p>
-        </div>
-        
-        <div class="diagram">
-            <h2>Diagrama de Venn</h2>
-            <div class="venn">
-                <div class="circle circle-a" id="circle-a">A</div>
-                <div class="circle circle-b" id="circle-b">B</div>
+        <div id="tab1" class="tab-content active">
+            <div class="group">
+                <h2>Registro de Observaciones</h2>
+                <p>Registra datos y observaciones relevantes para el análisis probabilístico.</p>
+                
+                <label for="contexto-problema">Descripción del contexto del problema:</label>
+                <textarea id="contexto-problema" placeholder="Describe el contexto del problema que estás analizando..."></textarea>
+                
+                <label for="descripcion-dominio">Descripción del dominio o área de aplicación:</label>
+                <input type="text" id="descripcion-dominio" placeholder="Ej: Medicina, Finanzas, Marketing...">
+                
+                <label for="nueva-observacion">Nueva observación:</label>
+                <textarea id="nueva-observacion" placeholder="Ingresa una observación relevante para el análisis..."></textarea>
+                
+                <button id="agregar-observacion">AGREGAR OBSERVACIÓN</button>
+                
+                <div id="observaciones-lista">
+                    <p>> No hay observaciones registradas...</p>
+                </div>
+                
+                <label for="fuente-datos">Fuente de datos:</label>
+                <input type="text" id="fuente-datos" placeholder="Ej: Estudio clínico, Encuesta, Mediciones...">
+                
+                <label for="fecha-observacion">Fecha de observación:</label>
+                <input type="text" id="fecha-observacion" placeholder="DD/MM/AAAA">
             </div>
+            
+            <button id="siguiente-tab1" class="siguiente-tab">SIGUIENTE</button>
+        </div>
+        
+        <div id="tab2" class="tab-content">
+            <div class="group">
+                <h2>Configuración del espacio muestral</h2>
+                
+                <label for="descripcion-espacio">Descripción del espacio muestral:</label>
+                <textarea id="descripcion-espacio" placeholder="Describe el conjunto de todos los resultados posibles..."></textarea>
+                
+                <label for="elemento-espacio">Agregar elemento al espacio muestral:</label>
+                <input type="text" id="elemento-espacio" placeholder="Ej: Paciente 1, Estudiante A...">
+                <button id="agregar-elemento">AGREGAR ELEMENTO</button>
+                
+                <div id="elementos-espacio">
+                    <p>> Elementos: ninguno agregado</p>
+                </div>
+                
+                <label for="evento-a">Nombre del evento A:</label>
+                <input type="text" id="evento-a" placeholder="Ej: Tener la enfermedad">
+                
+                <label for="descripcion-evento-a">Descripción detallada del evento A:</label>
+                <textarea id="descripcion-evento-a" placeholder="Describe en qué consiste este evento..."></textarea>
+                
+                <label for="evento-b">Nombre del evento B (evidencia):</label>
+                <input type="text" id="evento-b" placeholder="Ej: Resultado positivo en prueba">
+                
+                <label for="descripcion-evento-b">Descripción detallada del evento B:</label>
+                <textarea id="descripcion-evento-b" placeholder="Describe en qué consiste este evento..."></textarea>
+                
+                <label for="total-poblacion">Tamaño del espacio muestral (población total):</label>
+                <input type="number" id="total-poblacion" min="1" placeholder="Ej: 1000">
+            </div>
+            
+            <button id="anterior-tab2" class="anterior-tab">ANTERIOR</button>
+            <button id="siguiente-tab2" class="siguiente-tab">SIGUIENTE</button>
+        </div>
+        
+        <div id="tab3" class="tab-content">
+            <div class="group">
+                <h2>Datos de probabilidad</h2>
+                <label for="prob-a">P(A) - Probabilidad a priori de A:</label>
+                <input type="number" id="prob-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.01">
+                <p class="input-helper">Probabilidad inicial de que ocurra el evento A sin considerar la evidencia.</p>
+                
+                <label for="prob-b-given-a">P(B|A) - Probabilidad de B dado A:</label>
+                <input type="number" id="prob-b-given-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.95">
+                <p class="input-helper">Probabilidad de que ocurra el evento B cuando se sabe que ocurrió el evento A.</p>
+                
+                <label for="prob-b-given-not-a">P(B|¬A) - Probabilidad de B dado NO A:</label>
+                <input type="number" id="prob-b-given-not-a" min="0" max="1" step="0.0001" placeholder="Ej: 0.05">
+                <p class="input-helper">Probabilidad de que ocurra el evento B cuando se sabe que NO ocurrió el evento A.</p>
+                
+                <label for="justificacion-valores">Justificación de los valores de probabilidad:</label>
+                <textarea id="justificacion-valores" placeholder="Explica cómo se determinaron los valores de probabilidad..."></textarea>
+            </div>
+            
+            <button id="anterior-tab3" class="anterior-tab">ANTERIOR</button>
+            <button id="siguiente-tab3" class="siguiente-tab">CALCULAR PROBABILIDADES</button>
+            <button id="reset" class="reset-btn">REINICIAR DATOS</button>
+            <button id="cargar-ejemplo" class="ejemplo-btn">CARGAR EJEMPLO ENFERMEDAD</button>
+        </div>
+        
+        <div id="tab4" class="tab-content">
+            <div class="group">
+                <h2>Resultados</h2>
+                
+                <div class="output" id="resultados">
+                    <p>> Presiona CALCULAR para ver los resultados...</p>
+                </div>
+                
+                <div class="diagram">
+                    <h2>Diagrama de Venn</h2>
+                    <div class="venn">
+                        <div class="circle circle-a" id="circle-a">A</div>
+                        <div class="circle circle-b" id="circle-b">B</div>
+                    </div>
+                </div>
+                
+                <div class="output" id="conclusiones">
+                    <h2>Conclusiones e interpretación</h2>
+                    <p>> Aquí se mostrará la interpretación de los resultados...</p>
+                </div>
+            </div>
+            
+            <button id="anterior-tab4" class="anterior-tab">ANTERIOR</button>
+            <button id="exportar-resultados">EXPORTAR RESULTADOS</button>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Elementos del DOM
-            const calcularBtn = document.getElementById('calcular');
+            // Elementos DOM
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const progressBar = document.getElementById('progress-bar');
+            const progressSteps = document.querySelectorAll('.progress-step');
+            const calcularBtn = document.getElementById('siguiente-tab3');
             const resetBtn = document.getElementById('reset');
-            const cargarEjemploBtn = document.getElementById('cargar-ejemplo');
             const resultadosDiv = document.getElementById('resultados');
+            const conclusionesDiv = document.getElementById('conclusiones');
             const circleA = document.getElementById('circle-a');
             const circleB = document.getElementById('circle-b');
             
-            // Creación de líneas de grid animadas
-            for (let i = 0; i < 5; i++) {
-                const delay = i * 0.6;
-                const gridLine = document.createElement('div');
-                gridLine.className = 'grid-line';
-                gridLine.style.top = (i * 20) + 'px';
-                gridLine.style.animationDelay = delay + 's';
-                document.querySelector('.retro-grid').appendChild(gridLine);
+            const agregarObservacionBtn = document.getElementById('agregar-observacion');
+            const nuevaObservacionInput = document.getElementById('nueva-observacion');
+            const observacionesLista = document.getElementById('observaciones-lista');
+            
+            const agregarElementoBtn = document.getElementById('agregar-elemento');
+            const elementoEspacioInput = document.getElementById('elemento-espacio');
+            const elementosEspacio = document.getElementById('elementos-espacio');
+            
+            const siguienteTab1 = document.getElementById('siguiente-tab1');
+            const siguienteTab2 = document.getElementById('siguiente-tab2');
+            const anteriorTab2 = document.getElementById('anterior-tab2');
+            const anteriorTab3 = document.getElementById('anterior-tab3');
+            const anteriorTab4 = document.getElementById('anterior-tab4');
+            const exportarBtn = document.getElementById('exportar-resultados');
+            const cargarEjemploBtn = document.getElementById('cargar-ejemplo');
+            
+            // Variables globales
+            let observaciones = [];
+            let elementosEspacioMuestral = [];
+            let currentTab = 0;
+            
+            // Inicialización de la retícula retro
+            inicializarRetroGrid();
+            
+            // Manejadores de eventos para pestañas
+            tabButtons.forEach(button => {
+                button.addEventListener('click', cambiarTab);
+            });
+            
+            // Eventos para botones de navegación
+            siguienteTab1.addEventListener('click', () => tabButtons[1].click());
+            siguienteTab2.addEventListener('click', () => tabButtons[2].click());
+            anteriorTab2.addEventListener('click', () => tabButtons[0].click());
+            anteriorTab3.addEventListener('click', () => tabButtons[1].click());
+            anteriorTab4.addEventListener('click', () => tabButtons[2].click());
+            
+            // Eventos para agregar observaciones y elementos
+            agregarObservacionBtn.addEventListener('click', agregarObservacion);
+            agregarElementoBtn.addEventListener('click', agregarElemento);
+            
+            // Eventos para cálculos y reinicio
+            calcularBtn.addEventListener('click', calcularProbabilidades);
+            resetBtn.addEventListener('click', reiniciarDatos);
+            cargarEjemploBtn.addEventListener('click', cargarEjemplo);
+            exportarBtn.addEventListener('click', exportarResultados);
+            
+            // Funciones de inicialización
+            function inicializarRetroGrid() {
+                for (let i = 0; i < 5; i++) {
+                    const delay = i * 0.6;
+                    const gridLine = document.createElement('div');
+                    gridLine.className = 'grid-line';
+                    gridLine.style.top = (i * 20) + 'px';
+                    gridLine.style.animationDelay = delay + 's';
+                    document.querySelector('.retro-grid').appendChild(gridLine);
+                }
+            }
+            
+            // Funciones para manejo de pestañas
+            function cambiarTab() {
+                const tabId = this.getAttribute('data-tab');
+                
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                
+                const tabIndex = parseInt(tabId.replace('tab', '')) - 1;
+                updateProgressBar(tabIndex);
+            }
+            
+            function updateProgressBar(tabIndex) {
+                currentTab = tabIndex;
+                const progress = (tabIndex / (tabButtons.length - 1)) * 100;
+                progressBar.style.width = progress + '%';
+                
+                progressSteps.forEach((step, index) => {
+                    if (index <= tabIndex + 1) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Funciones para manejo de observaciones
+            function agregarObservacion() {
+                const observacion = nuevaObservacionInput.value.trim();
+                if (observacion) {
+                    observaciones.push(observacion);
+                    actualizarListaObservaciones();
+                    nuevaObservacionInput.value = '';
+                }
+            }
+            
+            function actualizarListaObservaciones() {
+                if (observaciones.length === 0) {
+                    observacionesLista.innerHTML = '<p>> No hay observaciones registradas...</p>';
+                    return;
+                }
+                
+                let html = '';
+                observaciones.forEach((obs, index) => {
+                    html += `
+                        <div class="observation-item">
+                            <p>Observación #${index + 1}: ${obs}</p>
+                            <button class="remove-observation" data-index="${index}">ELIMINAR</button>
+                        </div>
+                    `;
+                });
+                
+                observacionesLista.innerHTML = html;
+                
+                document.querySelectorAll('.remove-observation').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        observaciones.splice(index, 1);
+                        actualizarListaObservaciones();
+                    });
+                });
+            }
+            
+            // Funciones para manejo del espacio muestral
+            function agregarElemento() {
+                const elemento = elementoEspacioInput.value.trim();
+                if (elemento) {
+                    elementosEspacioMuestral.push(elemento);
+                    actualizarElementosEspacio();
+                    elementoEspacioInput.value = '';
+                }
+            }
+            
+            function actualizarElementosEspacio() {
+                if (elementosEspacioMuestral.length === 0) {
+                    elementosEspacio.innerHTML = '<p>> Elementos: ninguno agregado</p>';
+                    return;
+                }
+                
+                let html = '<p>> Elementos del espacio muestral:</p>';
+                elementosEspacioMuestral.forEach((elemento, index) => {
+                    html += `<span class="tag">${elemento} <button class="remove-element" data-index="${index}">×</button></span>`;
+                });
+                
+                elementosEspacio.innerHTML = html;
+                
+                document.querySelectorAll('.remove-element').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        elementosEspacioMuestral.splice(index, 1);
+                        actualizarElementosEspacio();
+                    });
+                });
             }
             
             // Función para calcular probabilidades
-            calcularBtn.addEventListener('click', function() {
-                // Obtener valores de entrada
+            function calcularProbabilidades() {
+                tabButtons[3].click();
+                
                 const eventoA = document.getElementById('evento-a').value || 'Evento A';
                 const eventoB = document.getElementById('evento-b').value || 'Evento B';
                 const total = parseFloat(document.getElementById('total-poblacion').value) || 1000;
                 const probA = parseFloat(document.getElementById('prob-a').value) || 0;
                 const probBGivenA = parseFloat(document.getElementById('prob-b-given-a').value) || 0;
                 const probBGivenNotA = parseFloat(document.getElementById('prob-b-given-not-a').value) || 0;
+                const descripcionA = document.getElementById('descripcion-evento-a').value || '';
+                const descripcionB = document.getElementById('descripcion-evento-b').value || '';
+                const justificacion = document.getElementById('justificacion-valores').value || '';
+                const contexto = document.getElementById('contexto-problema').value || '';
                 
-                // Validar entradas
                 if (probA < 0 || probA > 1 || probBGivenA < 0 || probBGivenA > 1 || 
                     probBGivenNotA < 0 || probBGivenNotA > 1) {
                     resultadosDiv.innerHTML = `<p style="color: red;">Error: Las probabilidades deben estar entre 0 y 1.</p>`;
                     return;
                 }
                 
-                // Cálculos de cardinalidad basados en probabilidades
+                // Cálculos
                 const cardinalidadA = Math.round(total * probA);
                 const cardinalidadNotA = total - cardinalidadA;
                 
@@ -325,13 +712,11 @@
                 const cardinalidadB = cardinalidadBGivenA + cardinalidadBGivenNotA;
                 const cardinalidadAandB = cardinalidadBGivenA;
                 
-                // Cálculo de las probabilidades
                 const probB = cardinalidadB / total;
-                const probAGivenB = probBGivenA * probA / probB;
+                const probAGivenB = probB > 0 ? (probBGivenA * probA / probB) : 0;
                 
-                // Actualizar la visualización del diagrama de Venn
-                circleA.textContent = `A: ${cardinalidadA}`;
-                circleB.textContent = `B: ${cardinalidadB}`;
+                // Actualizar diagrama de Venn
+                actualizarDiagramaVenn(cardinalidadA, cardinalidadB, cardinalidadAandB, total);
                 
                 // Mostrar resultados
                 resultadosDiv.innerHTML = `
@@ -344,42 +729,179 @@
                     <p>> P(${eventoB}) = ${probB.toFixed(4)}</p>
                     <p>> P(${eventoB}|${eventoA}) = ${probBGivenA.toFixed(4)}</p>
                     <p>> <span class="result-value">P(${eventoA}|${eventoB}) = ${probAGivenB.toFixed(4)}</span></p>
-                    <p>> Interpretación: La probabilidad de ${eventoA} dado que se observa ${eventoB} es ${(probAGivenB * 100).toFixed(2)}%</p>
                 `;
+
+                conclusionesDiv.innerHTML = `
+                    <h2>Conclusiones e interpretación</h2>
+                    <p>> La probabilidad de ${eventoA} dado que se observa ${eventoB} es ${(probAGivenB * 100).toFixed(2)}%</p>
+                    <p>> Contexto: ${contexto}</p>
+                    ${descripcionA ? `<p>> Descripción de ${eventoA}: ${descripcionA}</p>` : ''}
+                    ${descripcionB ? `<p>> Descripción de ${eventoB}: ${descripcionB}</p>` : ''}
+                    ${justificacion ? `<p>> Justificación de los valores usados: ${justificacion}</p>` : ''}
+                    <p>> Interpretación: Si conocemos que ${eventoB} ha ocurrido, la probabilidad de que ${eventoA} sea verdadero aumenta de ${(probA * 100).toFixed(2)}% a ${(probAGivenB * 100).toFixed(2)}%.</p>
+                    <p class="blink">> ANÁLISIS COMPLETADO.</p>
+                `;
+            }
+            
+            // Función para actualizar el diagrama de Venn
+            function actualizarDiagramaVenn(cardinalidadA, cardinalidadB, cardinalidadAandB, total) {
+                // Calcular la proporción para visualización
+                const propA = cardinalidadA / total;
+                const propB = cardinalidadB / total;
+                const propAandB = cardinalidadAandB / total;
                 
-                // Efecto de animación para los resultados
-                resultadosDiv.style.animation = 'none';
-                setTimeout(() => {
-                    resultadosDiv.style.animation = 'blink 0.2s';
-                }, 10);
-            });
+                // Ajustar tamaño de círculos según proporción (min 30%, max 90%)
+                const sizeA = 30 + Math.min(60, Math.round(propA * 100));
+                const sizeB = 30 + Math.min(60, Math.round(propB * 100));
+                
+                // Ajustar la superposición según la proporción de intersección
+                const overlapFactor = Math.min(0.7, Math.max(0.1, propAandB / Math.min(propA, propB)));
+                const baseDistance = 150; // Distancia base entre centros
+                const distance = baseDistance * (1 - overlapFactor);
+                
+                // Aplicar cambios a los círculos
+                circleA.style.width = sizeA + 'px';
+                circleA.style.height = sizeA + 'px';
+                circleB.style.width = sizeB + 'px';
+                circleB.style.height = sizeB + 'px';
+                
+                circleA.style.left = (150 - distance/2 - sizeA/2) + 'px';
+                circleB.style.left = (150 + distance/2 - sizeB/2) + 'px';
+                
+                // Actualizar colores basados en proporciones
+                circleA.style.backgroundColor = `rgba(255, 0, 255, ${0.3 + propA * 0.5})`;
+                circleB.style.backgroundColor = `rgba(0, 255, 255, ${0.3 + propB * 0.5})`;
+                
+                // Agregar etiquetas con cardinalidades
+                const eventoA = document.getElementById('evento-a').value || 'A';
+                const eventoB = document.getElementById('evento-b').value || 'B';
+                
+                circleA.innerHTML = `${eventoA}<br>${cardinalidadA}`;
+                circleB.innerHTML = `${eventoB}<br>${cardinalidadB}`;
+            }
             
             // Función para reiniciar datos
-            resetBtn.addEventListener('click', function() {
-                document.getElementById('evento-a').value = '';
-                document.getElementById('evento-b').value = '';
-                document.getElementById('total-poblacion').value = '';
-                document.getElementById('prob-a').value = '';
-                document.getElementById('prob-b-given-a').value = '';
-                document.getElementById('prob-b-given-not-a').value = '';
+            function reiniciarDatos() {
+                observaciones = [];
+                elementosEspacioMuestral = [];
+                actualizarListaObservaciones();
+                actualizarElementosEspacio();
                 
-                resultadosDiv.innerHTML = '<p>> Datos reiniciados. Presiona CALCULAR para ver nuevos resultados...</p>';
+                // Limpiar campos de texto y entrada
+                document.querySelectorAll('input, textarea').forEach(el => {
+                    el.value = '';
+                });
                 
-                circleA.textContent = 'A';
-                circleB.textContent = 'B';
-            });
+                resultadosDiv.innerHTML = '<p>> Presiona CALCULAR para ver los resultados...</p>';
+                conclusionesDiv.innerHTML = '<h2>Conclusiones e interpretación</h2><p>> Aquí se mostrará la interpretación de los resultados...</p>';
+                
+                // Reiniciar diagrama de Venn
+                circleA.style.width = '150px';
+                circleA.style.height = '150px';
+                circleB.style.width = '150px';
+                circleB.style.height = '150px';
+                circleA.style.left = '40px';
+                circleB.style.left = 'auto';
+                circleB.style.right = '40px';
+                circleA.innerHTML = 'A';
+                circleB.innerHTML = 'B';
+                circleA.style.backgroundColor = 'rgba(255, 0, 255, 0.5)';
+                circleB.style.backgroundColor = 'rgba(0, 255, 255, 0.5)';
+                
+                // Volver a la primera pestaña
+                tabButtons[0].click();
+            }
             
-            // Función para cargar ejemplo de enfermedad
-            cargarEjemploBtn.addEventListener('click', function() {
+            // Función para cargar ejemplo
+            function cargarEjemplo() {
+                document.getElementById('contexto-problema').value = 'Diagnóstico médico para una enfermedad rara utilizando una prueba de detección.';
+                document.getElementById('descripcion-dominio').value = 'Medicina - Diagnóstico clínico';
+                
+                observaciones = [
+                    'La prevalencia de la enfermedad en la población es del 1%',
+                    'La prueba de detección tiene una sensibilidad del 95% (detecta correctamente al 95% de los enfermos)',
+                    'La prueba tiene una especificidad del 95% (identifica correctamente al 95% de los sanos)',
+                    'Un paciente ha dado positivo en la prueba'
+                ];
+                actualizarListaObservaciones();
+                
+                document.getElementById('descripcion-espacio').value = 'Población general de pacientes que se someten a la prueba diagnóstica';
+                elementosEspacioMuestral = ['Pacientes enfermos', 'Pacientes sanos', 'Resultados positivos', 'Resultados negativos'];
+                actualizarElementosEspacio();
+                
                 document.getElementById('evento-a').value = 'Tener la enfermedad';
+                document.getElementById('descripcion-evento-a').value = 'Paciente que realmente tiene la enfermedad, independientemente del resultado de la prueba';
                 document.getElementById('evento-b').value = 'Resultado positivo';
+                document.getElementById('descripcion-evento-b').value = 'La prueba diagnóstica ha dado un resultado positivo para la enfermedad';
                 document.getElementById('total-poblacion').value = '10000';
+                
                 document.getElementById('prob-a').value = '0.01';
                 document.getElementById('prob-b-given-a').value = '0.95';
                 document.getElementById('prob-b-given-not-a').value = '0.05';
+                document.getElementById('justificacion-valores').value = 'Valores basados en estudios epidemiológicos de prevalencia y evaluaciones de la sensibilidad y especificidad de la prueba diagnóstica publicados en literatura médica.';
                 
-                resultadosDiv.innerHTML = '<p>> Ejemplo cargado. Presiona CALCULAR para ver los resultados...</p>';
-            });
+                // Avanzar a la pestaña de datos
+                tabButtons[2].click();
+            }
+            
+            // Función para exportar resultados
+            function exportarResultados() {
+                const eventoA = document.getElementById('evento-a').value || 'Evento A';
+                const eventoB = document.getElementById('evento-b').value || 'Evento B';
+                const probA = parseFloat(document.getElementById('prob-a').value) || 0;
+                const probBGivenA = parseFloat(document.getElementById('prob-b-given-a').value) || 0;
+                const probBGivenNotA = parseFloat(document.getElementById('prob-b-given-not-a').value) || 0;
+                
+                // Cálculos
+                const probB = probBGivenA * probA + probBGivenNotA * (1 - probA);
+                const probAGivenB = probB > 0 ? (probBGivenA * probA / probB) : 0;
+                
+                const contenido = `
+INFORME DE ANÁLISIS BAYESIANO
+=============================
+Fecha: ${new Date().toLocaleDateString()}
+
+DESCRIPCIÓN DEL PROBLEMA
+-----------------------
+${document.getElementById('contexto-problema').value || 'No especificado'}
+
+EVENTOS ANALIZADOS
+-----------------
+Evento A (${eventoA}): ${document.getElementById('descripcion-evento-a').value || 'No especificado'}
+Evento B (${eventoB}): ${document.getElementById('descripcion-evento-b').value || 'No especificado'}
+
+VALORES DE PROBABILIDAD
+---------------------
+P(${eventoA}) = ${probA.toFixed(4)}
+P(${eventoB}|${eventoA}) = ${probBGivenA.toFixed(4)}
+P(${eventoB}|¬${eventoA}) = ${probBGivenNotA.toFixed(4)}
+P(${eventoB}) = ${probB.toFixed(4)}
+
+RESULTADO FINAL
+-------------
+P(${eventoA}|${eventoB}) = ${probAGivenB.toFixed(4)} (${(probAGivenB * 100).toFixed(2)}%)
+
+INTERPRETACIÓN
+------------
+Si conocemos que ${eventoB} ha ocurrido, la probabilidad de que ${eventoA} sea verdadero es del ${(probAGivenB * 100).toFixed(2)}%.
+Esto representa un cambio desde la probabilidad inicial (a priori) de ${(probA * 100).toFixed(2)}%.
+
+OBSERVACIONES ADICIONALES
+-----------------------
+${observaciones.map((obs, i) => `${i+1}. ${obs}`).join('\n') || 'Ninguna observación registrada.'}
+
+Informe generado por Calculadora Bayesiana Retro 80s
+`;
+                
+                // Crear un blob y descargar
+                const blob = new Blob([contenido], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'analisis_bayesiano.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         });
     </script>
 </body>
